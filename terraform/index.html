@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraform Professional Study Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px; 
+            max-height: 400px; 
+        }
+        @media (min-width: 768px) { 
+            .chart-container { height: 350px; } 
+        }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .transition-transform { transition: transform 0.6s; }
+        .flashcard.is-flipped .flashcard-inner { transform: rotateY(180deg); }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals with Indigo Accents (Slate-50, Slate-800, Indigo-600, Indigo-50) -->
+    <!-- Application Structure Plan: The application is structured as an interactive learning dashboard with a sidebar navigation. It transforms the linear study guide into distinct, task-oriented modules: 'Overview' for a high-level summary and topic distribution, 'Foundations' for lists and command charts, 'Concepts' for deep dives, 'Vocabulary' for active recall flashcards, and 'Assessment' for self-testing. This structure was chosen to reduce cognitive load, allowing users to focus on one learning modality at a time, promoting active engagement over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Guide Topics -> Goal: Organize/Inform -> Viz: Radar Chart -> Interaction: Hover tooltips -> Justification: Shows the breadth and focus areas of the study guide at a glance -> Library: Chart.js. Confirming NO SVG/Mermaid.
+        2. Report Info: Top 10 Commands -> Goal: Compare/Inform -> Viz: Bar Chart -> Interaction: Hover details -> Justification: Transforms a static text list into a visual hierarchy of command utility -> Library: Chart.js. Confirming NO SVG/Mermaid.
+        3. Report Info: Vocabulary -> Goal: Organize/Engage -> Viz: Interactive Flashcards -> Interaction: Click to flip -> Justification: Active recall is the most effective way to memorize definitions -> Method: HTML/CSS/JS. Confirming NO SVG/Mermaid.
+        4. Report Info: Key Questions -> Goal: Inform/Engage -> Viz: Accordion Q&A -> Interaction: Click to reveal -> Justification: Self-assessment prevents passive reading illusion of competence -> Method: Vanilla JS + Tailwind. Confirming NO SVG/Mermaid.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex h-screen overflow-hidden">
+
+    <nav class="w-64 bg-slate-900 text-slate-100 flex flex-col hidden md:flex h-full shadow-xl z-20">
+        <div class="p-6 border-b border-slate-700">
+            <h1 class="text-2xl font-bold tracking-tight">🏗️ TF Mastery</h1>
+            <p class="text-xs text-slate-400 mt-1">Professional Study Guide</p>
+        </div>
+        <div class="flex-1 py-4 overflow-y-auto">
+            <ul class="space-y-1">
+                <li><button onclick="nav('overview')" id="nav-overview" class="w-full text-left px-6 py-3 bg-indigo-600 text-white font-medium transition-colors">📊 Overview</button></li>
+                <li><button onclick="nav('foundations')" id="nav-foundations" class="w-full text-left px-6 py-3 hover:bg-slate-800 text-slate-300 transition-colors">🧱 Foundations</button></li>
+                <li><button onclick="nav('concepts')" id="nav-concepts" class="w-full text-left px-6 py-3 hover:bg-slate-800 text-slate-300 transition-colors">🧠 Core Concepts</button></li>
+                <li><button onclick="nav('vocabulary')" id="nav-vocabulary" class="w-full text-left px-6 py-3 hover:bg-slate-800 text-slate-300 transition-colors">📇 Vocabulary</button></li>
+                <li><button onclick="nav('assessment')" id="nav-assessment" class="w-full text-left px-6 py-3 hover:bg-slate-800 text-slate-300 transition-colors">📝 Assessment</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center fixed w-full top-0 z-30">
+        <h1 class="text-xl font-bold">🏗️ TF Mastery</h1>
+        <select onchange="nav(this.value)" class="bg-slate-800 text-white p-2 rounded outline-none border border-slate-700">
+            <option value="overview">📊 Overview</option>
+            <option value="foundations">🧱 Foundations</option>
+            <option value="concepts">🧠 Core Concepts</option>
+            <option value="vocabulary">📇 Vocabulary</option>
+            <option value="assessment">📝 Assessment</option>
+        </select>
+    </div>
+
+    <main class="flex-1 h-full overflow-y-auto pt-16 md:pt-0 pb-12">
+        
+        <section id="sec-overview" class="p-8 md:p-12 max-w-6xl mx-auto block">
+            <header class="mb-8">
+                <h2 class="text-4xl font-extrabold text-slate-900 mb-2">Infrastructure as Code</h2>
+                <h3 class="text-xl text-indigo-600 font-semibold mb-4">Terraform Professional Study Guide</h3>
+                <p class="text-lg leading-relaxed text-slate-600 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    This interactive dashboard covers the lifecycle of managing infrastructure through Terraform, moving beyond basic resource creation into production-ready patterns. It focuses on the internal mechanics of how Terraform tracks resources (State), how it ensures consistency across teams (Locking and Workspaces), and how to handle complex configurations.
+                </p>
+            </header>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+                <h4 class="text-lg font-bold text-slate-800 mb-2">Topic Distribution</h4>
+                <p class="text-sm text-slate-500 mb-6">This radar chart illustrates the primary focus areas of the professional study guide, emphasizing state management, advanced syntax, and security over basic foundational operations.</p>
+                <div class="chart-container">
+                    <canvas id="topicRadarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-foundations" class="p-8 md:p-12 max-w-6xl mx-auto hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Terraform Foundations</h2>
+                <p class="text-lg text-slate-600 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    This section details the core building blocks of Terraform. Here you will find an interactive breakdown of the HashiCorp Configuration Language (HCL) syntax, the essential resources you will use daily, and a visual representation of the most critical CLI commands.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">HCL Syntax Rules</h3>
+                    <ul class="space-y-4">
+                        <li class="p-4 bg-slate-50 rounded border border-slate-100">
+                            <span class="font-bold text-indigo-600">Blocks:</span> Containers for content.<br>
+                            <code class="text-sm bg-slate-200 px-2 py-1 rounded mt-2 inline-block">resource "aws_instance" "web" { ... }</code>
+                        </li>
+                        <li class="p-4 bg-slate-50 rounded border border-slate-100">
+                            <span class="font-bold text-indigo-600">Arguments:</span> Assign a value to a name.<br>
+                            <code class="text-sm bg-slate-200 px-2 py-1 rounded mt-2 inline-block">ami = "ami-123456"</code>
+                        </li>
+                        <li class="p-4 bg-slate-50 rounded border border-slate-100">
+                            <span class="font-bold text-indigo-600">Expressions:</span> Represent values, literally or referenced.<br>
+                            <code class="text-sm bg-slate-200 px-2 py-1 rounded mt-2 inline-block">var.instance_type</code>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Top 10 Essential Resources</h3>
+                    <p class="text-sm text-slate-500 mb-4">Click an item to see its definition.</p>
+                    <div id="resources-list" class="space-y-2 h-72 overflow-y-auto pr-2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Command Frequency Analysis</h3>
+                <p class="text-sm text-slate-500 mb-6">A visualization of the top 10 most used commands in the core Terraform workflow. Hover over the bars to see command descriptions.</p>
+                <div class="chart-container">
+                    <canvas id="commandsBarChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-concepts" class="p-8 md:p-12 max-w-6xl mx-auto hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Core Concepts</h2>
+                <p class="text-lg text-slate-600 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    Understanding how Terraform operates under the hood is crucial for professional usage. This section breaks down the complex architectural patterns like dependency management, state reconciliation, and environment separation. Click on each concept card to explore its details.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="concepts-grid">
+            </div>
+        </section>
+
+        <section id="sec-vocabulary" class="p-8 md:p-12 max-w-6xl mx-auto hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Vocabulary Flashcards</h2>
+                <p class="text-lg text-slate-600 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    Master the advanced terminology. Click on any card below to flip it and reveal the definition. This active recall exercise is designed to solidify your understanding of advanced HCL logic and state mechanics.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="flashcards-grid">
+            </div>
+        </section>
+
+        <section id="sec-assessment" class="p-8 md:p-12 max-w-6xl mx-auto hidden">
+            <header class="mb-8">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Self-Assessment</h2>
+                <p class="text-lg text-slate-600 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    Test your comprehension of the study guide material. Read the question carefully, formulate your answer mentally, and then click "Reveal Answer" to check your understanding.
+                </p>
+            </header>
+
+            <div class="space-y-4" id="assessment-container">
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const state = {
+            activeSection: 'overview'
+        };
+
+        const tfData = {
+            resources: [
+                { name: "resource", desc: "The heart of Terraform; defines a piece of infrastructure." },
+                { name: "variable", desc: "Defines input values to customize configurations." },
+                { name: "output", desc: "Defines values to highlight to the user or pass to other modules." },
+                { name: "data", desc: "Queries data from existing infrastructure or external APIs." },
+                { name: "module", desc: "A container for multiple resources used together." },
+                { name: "provider", desc: "Configures the platform (AWS, Azure, GCP) Terraform interacts with." },
+                { name: "locals", desc: "Internal temporary variables for complex logic." },
+                { name: "terraform", desc: "Configuration block for Terraform settings (version, backend)." },
+                { name: "provisioner", desc: "(Use sparingly) Executes scripts on local or remote machines." },
+                { name: "import", desc: "Brings existing, unmanaged infrastructure into Terraform state." }
+            ],
+            commands: [
+                { cmd: "init", score: 10, desc: "Initializes directory, downloads providers." },
+                { cmd: "plan", score: 9, desc: "Previews changes." },
+                { cmd: "apply", score: 9, desc: "Executes changes." },
+                { cmd: "destroy", score: 5, desc: "Tears down infrastructure." },
+                { cmd: "validate", score: 6, desc: "Checks syntax/consistency." },
+                { cmd: "fmt", score: 7, desc: "Reformats HCL code." },
+                { cmd: "show", score: 4, desc: "Reads state/plan files." },
+                { cmd: "state list", score: 5, desc: "Lists tracked resources." },
+                { cmd: "output", score: 6, desc: "Prints output values." },
+                { cmd: "workspace list", score: 3, desc: "Shows environments." }
+            ],
+            concepts: [
+                { icon: "🕸️", title: "The Dependency Graph", content: "Terraform builds a directed acyclic graph (DAG) to determine the order of resource creation. Uses implicit mapping via variables, or explicit mapping via the `depends_on` argument for non-obvious relationships." },
+                { icon: "🔄", title: "State Drift & Reconciliation", content: "Infrastructure is rarely static. 'Drift' occurs when reality changes outside of Terraform. Modern versions perform automatic refresh checks during `plan` and `apply` phases to ensure state matches reality." },
+                { icon: "🔒", title: "Provider Versioning", content: "The `terraform.lock.hcl` file is vital for team environments. It locks the specific version and checksum of provider plugins to ensure every machine uses the exact same binary." },
+                { icon: "📦", title: "Modular Architecture", content: "The 'Root Module' serves as orchestration, while child modules provide reusable, encapsulated logic. This allows for standardized infrastructure patterns across an organization." },
+                { icon: "🌿", title: "Environment Separation", content: "Workspaces allow multiple states to exist for a single configuration. This enables 'dry' environment management (e.g., dev, staging, prod) without code duplication." }
+            ],
+            vocabulary: [
+                { term: "terraform.lock.hcl", def: "A dependency lock file that ensures consistent provider versions across different execution environments." },
+                { term: "Sensitive Argument", def: "A variable setting (`sensitive = true`) that masks values in terminal output to prevent accidental exposure of secrets in logs." },
+                { term: "Splat Expression", def: "A concise syntax (`[*]`) used to iterate over a list of resources and extract a specific attribute from each." },
+                { term: "Dynamic Block", def: "A construct used to produce multiple nested configuration blocks within a resource based on a complex variable (like a list or map)." },
+                { term: "terraform_remote_state", def: "A data source used to read the output values from a completely separate Terraform configuration's state file." },
+                { term: "State Locking", def: "A mechanism provided by backends to prevent multiple users from running operations on the same state file simultaneously." },
+                { term: "Taint", def: "(Legacy) Now handled by the `-replace` flag. Forces a specific resource to be destroyed and recreated." }
+            ],
+            questions: [
+                { q: "Why should you avoid storing the terraform.tfstate file in a version control system like Git?", a: "The state file often contains sensitive data (passwords, API keys, IPs) in plain text. Committing it to Git exposes these secrets to anyone with repository access. Additionally, Git does not provide native state locking, which can lead to conflicts if multiple developers apply changes simultaneously." },
+                { q: "What is the fundamental difference between count and for_each?", a: "count uses numerical indexes (0, 1, 2). If you remove an item from the middle of a list using count, Terraform shifts the indexes, potentially destroying and recreating resources unnecessarily. for_each uses a map or a set of strings as keys, so removing an item only affects that specific resource, leaving the others untouched." },
+                { q: "If you rename a resource in your code, how do you prevent Terraform from destroying the old one and creating a new one?", a: "You must use the `terraform state mv` command (or the newer `moved` block in HCL) to tell Terraform that the old resource address in the state file now maps to the new resource address in your configuration code." },
+                { q: "How does the lifecycle block's prevent_destroy argument help in production environments?", a: "When `prevent_destroy = true` is set on a resource, Terraform will immediately reject any `terraform plan` or `terraform apply` that would result in the destruction of that resource, acting as a safeguard for critical databases or storage." },
+                { q: "Explain the components of a dynamic block.", a: "A dynamic block iterates over a complex value to generate nested blocks. `for_each` defines the collection to iterate over. `iterator` (optional) assigns a temporary name to the current element. `content` defines the actual configuration nested inside the generated block, utilizing the iterator to set values." }
+            ]
+        };
+
+        function nav(sectionId) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById('sec-' + sectionId).classList.remove('hidden');
+            
+            if(window.innerWidth >= 768) {
+                document.querySelectorAll('nav button').forEach(btn => {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('hover:bg-slate-800', 'text-slate-300');
+                });
+                const activeBtn = document.getElementById('nav-' + sectionId);
+                if(activeBtn) {
+                    activeBtn.classList.remove('hover:bg-slate-800', 'text-slate-300');
+                    activeBtn.classList.add('bg-indigo-600', 'text-white');
+                }
+            }
+            state.activeSection = sectionId;
+        }
+
+        function initApp() {
+            renderResources();
+            renderConcepts();
+            renderFlashcards();
+            renderAssessment();
+            initCharts();
+        }
+
+        function renderResources() {
+            const container = document.getElementById('resources-list');
+            tfData.resources.forEach((res, index) => {
+                const item = document.createElement('div');
+                item.className = 'border border-slate-200 rounded overflow-hidden cursor-pointer hover:border-indigo-400 transition-colors bg-slate-50';
+                item.innerHTML = `
+                    <div class="px-4 py-3 flex justify-between items-center bg-white" onclick="toggleResource(${index})">
+                        <span class="font-mono text-sm font-bold text-indigo-700">${res.name}</span>
+                        <span class="text-slate-400 text-xs">▼</span>
+                    </div>
+                    <div id="res-desc-${index}" class="px-4 py-3 text-sm text-slate-600 hidden border-t border-slate-100 bg-slate-50">
+                        ${res.desc}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function toggleResource(index) {
+            const el = document.getElementById(`res-desc-${index}`);
+            el.classList.toggle('hidden');
+        }
+
+        function renderConcepts() {
+            const container = document.getElementById('concepts-grid');
+            tfData.concepts.forEach(concept => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow';
+                card.innerHTML = `
+                    <div class="text-4xl mb-4">${concept.icon}</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">${concept.title}</h3>
+                    <p class="text-slate-600 leading-relaxed">${concept.content}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderFlashcards() {
+            const container = document.getElementById('flashcards-grid');
+            tfData.vocabulary.forEach((item, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flashcard perspective-1000 h-64 cursor-pointer';
+                wrapper.onclick = () => wrapper.classList.toggle('is-flipped');
+                
+                wrapper.innerHTML = `
+                    <div class="flashcard-inner relative w-full h-full transition-transform transform-style-3d shadow-sm hover:shadow-md rounded-xl">
+                        <div class="absolute w-full h-full backface-hidden bg-white border border-slate-200 rounded-xl flex items-center justify-center p-6 text-center">
+                            <h3 class="text-xl font-bold text-indigo-700 font-mono">${item.term}</h3>
+                            <p class="absolute bottom-4 text-xs text-slate-400">Click to flip</p>
+                        </div>
+                        <div class="absolute w-full h-full backface-hidden rotate-y-180 bg-slate-800 text-white border border-slate-700 rounded-xl flex items-center justify-center p-6 text-center">
+                            <p class="text-sm md:text-base leading-relaxed">${item.def}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        function renderAssessment() {
+            const container = document.getElementById('assessment-container');
+            tfData.questions.forEach((item, index) => {
+                const block = document.createElement('div');
+                block.className = 'bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden';
+                block.innerHTML = `
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4"><span class="text-indigo-600 mr-2">Q${index+1}:</span>${item.q}</h3>
+                        <button onclick="document.getElementById('ans-${index}').classList.remove('hidden'); this.classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded transition-colors">Reveal Answer</button>
+                        <div id="ans-${index}" class="hidden mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-500 text-slate-700 rounded-r">
+                            ${item.a}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function initCharts() {
+            const radarCtx = document.getElementById('topicRadarChart').getContext('2d');
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Basics & HCL', 'State Mgmt', 'Modularity', 'Security', 'Advanced Logic', 'Workflow CLI'],
+                    datasets: [{
+                        label: 'Guide Emphasis',
+                        data: [4, 10, 8, 7, 9, 6],
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        pointBackgroundColor: 'rgba(79, 70, 229, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(79, 70, 229, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0,0,0,0.1)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' },
+                            pointLabels: { font: { size: 12 }, color: '#475569' },
+                            ticks: { display: false, max: 10, min: 0 }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            const barCtx = document.getElementById('commandsBarChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: tfData.commands.map(c => c.cmd),
+                    datasets: [{
+                        label: 'Utility Score',
+                        data: tfData.commands.map(c => c.score),
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return tfData.commands[context.dataIndex].desc;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
