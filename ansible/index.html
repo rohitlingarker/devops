@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansible Mastery Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals with Teal and Indigo Accents -->
+    <!-- Application Structure Plan: A dashboard-style layout with a persistent sidebar (or bottom nav on mobile) allowing users to switch between four distinct learning modules: 'Core Philosophy' (comparing Ansible to legacy methods), 'The 10 Pillars' (interactive topic explorer), 'Glossary' (searchable vocabulary), and 'Active Recall' (interactive quiz). This structure transforms a linear study guide into a self-paced, non-linear learning environment, prioritizing exploration and active engagement over passive reading. -->
+    <!-- Visualization & Content Choices: 
+         1. Core Philosophy -> Goal: Compare -> Viz: Radar Chart (Chart.js) comparing Ansible vs Traditional Scripting on metrics like Idempotency, Speed, and Scalability -> Justification: Shows the paradigm shift effectively without overwhelming text.
+         2. The 10 Pillars -> Goal: Organize/Inform -> Viz: Donut Chart (Chart.js) functioning as a circular navigation menu -> Interaction: Clicking a slice reveals detailed text for that topic -> Justification: Gamifies the reading experience and breaks down a dense 10-point list into digestible, user-driven chunks. 
+         3. Glossary -> Goal: Organize -> Viz: Searchable grid of flashcards (HTML/CSS/JS) -> Justification: Best for quick reference and specific term lookup.
+         4. Active Recall -> Goal: Inform -> Viz: Accordion list (HTML/JS) -> Justification: Forces the user to think before revealing the answer, aligning with the study guide's goals.
+         Confirming NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-active {
+            background-color: #0f766e;
+            color: white;
+        }
+        .flashcard-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            backface-visibility: hidden;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <nav class="bg-stone-900 text-stone-300 w-full md:w-64 flex-shrink-0 flex flex-col z-20 shadow-xl">
+        <div class="p-6 border-b border-stone-700">
+            <h1 class="text-2xl font-bold text-teal-400 tracking-tight">Ansible Mastery</h1>
+            <p class="text-xs text-stone-400 mt-1 uppercase tracking-widest">Interactive Study Guide</p>
+        </div>
+        <div class="flex-1 overflow-y-auto hide-scroll flex flex-row md:flex-col py-4 px-2 md:px-4 gap-2 border-b md:border-b-0 border-stone-700">
+            <button onclick="switchTab('core')" id="nav-core" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-stone-800 nav-active flex items-center gap-3">
+                <span class="text-xl">&#127963;</span> <span class="hidden md:inline">Core Philosophy</span>
+            </button>
+            <button onclick="switchTab('pillars')" id="nav-pillars" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-stone-800 flex items-center gap-3">
+                <span class="text-xl">&#128202;</span> <span class="hidden md:inline">The 10 Pillars</span>
+            </button>
+            <button onclick="switchTab('glossary')" id="nav-glossary" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-stone-800 flex items-center gap-3">
+                <span class="text-xl">&#128214;</span> <span class="hidden md:inline">Glossary</span>
+            </button>
+            <button onclick="switchTab('recall')" id="nav-recall" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors hover:bg-stone-800 flex items-center gap-3">
+                <span class="text-xl">&#9889;</span> <span class="hidden md:inline">Active Recall</span>
+            </button>
+        </div>
+        <div class="p-4 hidden md:block border-t border-stone-700 text-xs text-stone-500">
+            DevOps & Infrastructure Automation
+        </div>
+    </nav>
+
+    <main class="flex-1 h-full overflow-y-auto bg-stone-50 relative hide-scroll">
+        
+        <div id="section-core" class="content-section p-6 md:p-12 max-w-6xl mx-auto block animation-fade-in">
+            <header class="mb-10">
+                <h2 class="text-4xl font-extrabold text-stone-900 mb-4 tracking-tight">Core Philosophy & Architecture</h2>
+                <div class="bg-white border-l-4 border-teal-600 p-6 rounded-r-lg shadow-sm">
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        Welcome to the foundation of your Ansible knowledge. This section illustrates why Ansible dominates the DevOps space. It explores the paradigm shift from traditional procedural scripting to Ansible's declarative, agentless, and push-based model. Interact with the chart below to understand how Ansible bridges the gap between systems administration and software engineering.
+                    </p>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+                    <h3 class="text-xl font-bold text-stone-800 mb-6 text-center">Ansible vs. Traditional Scripting</h3>
+                    <div class="chart-container">
+                        <canvas id="architectureChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-stone-500 mt-4 italic">Scores represent conceptual strength in automation metrics.</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="bg-stone-100 p-6 rounded-xl hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-stone-200 cursor-default">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl">&#128640;</span>
+                            <h4 class="text-lg font-bold text-stone-800">Agentless Architecture</h4>
+                        </div>
+                        <p class="text-stone-600 text-sm leading-relaxed">Ansible's greatest strength. It uses standard OpenSSH for transport, meaning there is no "agent" to upgrade, no extra ports to open, and no background service to crash on target nodes.</p>
+                    </div>
+
+                    <div class="bg-stone-100 p-6 rounded-xl hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-stone-200 cursor-default">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl">&#9878;</span>
+                            <h4 class="text-lg font-bold text-stone-800">Idempotency & Desired State</h4>
+                        </div>
+                        <p class="text-stone-600 text-sm leading-relaxed">Unlike traditional scripting, Ansible is "State-Aware." It focuses on bringing a system to a predefined state, regardless of its starting point. This reduces "Configuration Drift."</p>
+                    </div>
+
+                    <div class="bg-stone-100 p-6 rounded-xl hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-stone-200 cursor-default">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl">&#128225;</span>
+                            <h4 class="text-lg font-bold text-stone-800">Push vs. Pull Dynamics</h4>
+                        </div>
+                        <p class="text-stone-600 text-sm leading-relaxed">Most automation tools use a pull model. Ansible's push model gives the administrator full control over <em>when</em> updates happen, allowing for coordinated "rolling updates".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-pillars" class="content-section p-6 md:p-12 max-w-6xl mx-auto hidden animation-fade-in">
+            <header class="mb-10">
+                <h2 class="text-4xl font-extrabold text-stone-900 mb-4 tracking-tight">The 10 Pillars of Ansible</h2>
+                <div class="bg-white border-l-4 border-indigo-600 p-6 rounded-r-lg shadow-sm">
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        This section breaks down the comprehensive study guide into its 10 core topics. The interactive wheel below acts as your navigation tool. Click on any segment of the wheel to dive deep into a specific Ansible concept, from basic Inventory Management to enterprise-grade Vault security.
+                    </p>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-stone-200 flex flex-col justify-center">
+                    <h3 class="text-xl font-bold text-stone-800 mb-2 text-center">Topic Explorer</h3>
+                    <p class="text-sm text-stone-500 text-center mb-6">Select a slice to view details.</p>
+                    <div class="chart-container">
+                        <canvas id="topicsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-3 bg-stone-900 text-stone-100 p-8 rounded-2xl shadow-xl flex flex-col justify-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-indigo-500" id="topic-accent"></div>
+                    <div id="topic-content" class="min-h-[300px] flex flex-col justify-center">
+                        <div class="text-center opacity-50">
+                            <span class="text-6xl mb-4 block">&#128072;</span>
+                            <p class="text-xl">Select a topic from the wheel to begin exploration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-glossary" class="content-section p-6 md:p-12 max-w-6xl mx-auto hidden animation-fade-in">
+            <header class="mb-10">
+                <h2 class="text-4xl font-extrabold text-stone-900 mb-4 tracking-tight">Terminology Glossary</h2>
+                <div class="bg-white border-l-4 border-stone-800 p-6 rounded-r-lg shadow-sm mb-6">
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        Mastering any technology requires speaking its language. This section provides an interactive vocabulary list. Use the search bar to filter terms quickly, or click on any flashcard to flip it and reveal the full definition and its implications in infrastructure automation.
+                    </p>
+                </div>
+                <div class="relative max-w-md">
+                    <input type="text" id="vocabSearch" placeholder="Search terminology..." class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm transition-all text-stone-700 bg-white">
+                    <span class="absolute left-3 top-3.5 text-stone-400 text-lg">&#128269;</span>
+                </div>
+            </header>
+
+            <div id="vocab-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </div>
+
+        <div id="section-recall" class="content-section p-6 md:p-12 max-w-4xl mx-auto hidden animation-fade-in">
+            <header class="mb-10">
+                <h2 class="text-4xl font-extrabold text-stone-900 mb-4 tracking-tight">Active Recall Checks</h2>
+                <div class="bg-white border-l-4 border-amber-500 p-6 rounded-r-lg shadow-sm">
+                    <p class="text-stone-600 leading-relaxed text-lg">
+                        Passive reading creates an illusion of competence. This section forces you to actively retrieve information from memory, which is proven to strengthen retention. Read the operational scenarios below, formulate your answer mentally, and then reveal the explanation to check your understanding.
+                    </p>
+                </div>
+            </header>
+
+            <div id="quiz-container" class="space-y-4">
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const topicsData = [
+            {
+                title: "Inventory Management",
+                icon: "&#128451;",
+                points: [
+                    "<strong>The Source of Truth:</strong> The fundamental mapping of infrastructure logic (INI or YAML). Defines where specific logic should be applied.",
+                    "<strong>Hierarchical Logic:</strong> Supports Group Vars and Host Vars for cascading configurations (e.g., overriding a group variable on a specific host).",
+                    "<strong>Dynamic Inventories:</strong> Scripts/plugins that query cloud providers (AWS, GCP, Azure) to automatically discover instances based on tags, preventing configuration drift."
+                ]
+            },
+            {
+                title: "Ad-hoc Commands",
+                icon: "&#9889;",
+                points: [
+                    "<strong>Purpose:</strong> The 'Swiss Army Knife' for immediate tasks across hundreds of servers (e.g., security patching, checking disk space).",
+                    "<strong>The Pattern:</strong> <code>ansible &lt;pattern&gt; -m &lt;module&gt; -a &lt;args&gt;</code>",
+                    "<strong>Implications:</strong> Provides instant feedback on infrastructure health, indispensable for rapid-response troubleshooting."
+                ]
+            },
+            {
+                title: "Modules",
+                icon: "&#128295;",
+                points: [
+                    "<strong>Declarative Programming:</strong> Tells the system <em>what</em> it should be (e.g., state: present), not <em>how</em> to do it.",
+                    "<strong>Idempotency in Action:</strong> Compares current state vs desired state. If they match, it exits with 'ok' and makes zero changes.",
+                    "<strong>Core Modules:</strong> <code>apt/yum</code>, <code>copy/fetch</code>, <code>service/systemd</code>, <code>user</code>."
+                ]
+            },
+            {
+                title: "Playbook Architecture",
+                icon: "&#128220;",
+                points: [
+                    "<strong>YAML Blueprinting:</strong> High-level orchestration layer to order tasks across different sets of hosts.",
+                    "<strong>Structure:</strong> Play (who is targeted) -> Tasks (sequential list of actions). Every task should have a descriptive Name.",
+                    "<strong>Error Handling:</strong> Advanced logic like <code>ignore_errors: yes</code> or <code>failed_when</code> provides granular control over successful runs."
+                ]
+            },
+            {
+                title: "Variables & Facts",
+                icon: "&#128269;",
+                points: [
+                    "<strong>Flexibility:</strong> Swap variable files to use the same playbook across Dev, Staging, and Prod.",
+                    "<strong>Gathering Facts:</strong> The <code>setup</code> module collects thousands of remote system data points (OS, RAM, IPs) at the start of a play.",
+                    "<strong>Magic Variables:</strong> <code>groups</code> and <code>inventory_hostname</code> help create dynamic configurations between nodes."
+                ]
+            },
+            {
+                title: "Loops & Iteration",
+                icon: "&#128257;",
+                points: [
+                    "<strong>Efficiency:</strong> Prevents redundancy when applying the same task to multiple items.",
+                    "<strong>The loop Keyword:</strong> Passes each item in a list into the <code>{{ item }}</code> placeholder.",
+                    "<strong>Advanced:</strong> Iterate over dictionaries to perform complex tasks (e.g., creating multiple users with unique groups and paths)."
+                ]
+            },
+            {
+                title: "Conditionals",
+                icon: "&#10067;",
+                points: [
+                    "<strong>Intelligent Branching:</strong> Using the <code>when</code> clause allows Ansible to adapt on the fly, critical in multi-OS environments.",
+                    "<strong>Logic Examples:</strong> <code>when: ansible_distribution == 'Ubuntu'</code> or <code>when: storage_free_gb < 10</code>."
+                ]
+            },
+            {
+                title: "Templates (Jinja2)",
+                icon: "&#128196;",
+                points: [
+                    "<strong>Dynamic Configurations:</strong> Inject variables directly into configuration files (like nginx.conf).",
+                    "<strong>Logic Inside Files:</strong> Jinja2 supports loops and conditionals inside the template, enabling dynamic firewall or app configs.",
+                    "<strong>Use Case:</strong> Adjusting PHP memory limits dynamically based on the RAM discovered via Fact-Gathering."
+                ]
+            },
+            {
+                title: "Roles",
+                icon: "&#128188;",
+                points: [
+                    "<strong>Decoupling Logic:</strong> Breaks massive playbooks into standard directories: tasks/, handlers/, templates/, vars/, files/.",
+                    "<strong>Standardization:</strong> Enables team collaboration (e.g., one team maintains 'security', another 'app').",
+                    "<strong>Reusability:</strong> Call a role multiple times with different variables."
+                ]
+            },
+            {
+                title: "Ansible Vault",
+                icon: "&#128274;",
+                points: [
+                    "<strong>Enterprise Security:</strong> Encrypt entire files or specific string variables at rest.",
+                    "<strong>Lifecycle:</strong> Create, edit, encrypt, decrypt. Provide password at runtime via <code>--ask-vault-pass</code>.",
+                    "<strong>GitOps:</strong> Allows storing infrastructure code in Git without exposing sensitive passwords to unauthorized viewers."
+                ]
+            }
+        ];
+
+        const vocabData = [
+            { term: "Control Node", definition: "The system where you write and run your code; usually a Linux workstation or a CI/CD runner." },
+            { term: "Managed Node", definition: "Any device (Linux, Windows, Network Switch, Cloud Instance) that Ansible interacts with via SSH or API." },
+            { term: "Handlers", definition: "'Event-driven' tasks. Ensures a service (like Nginx) restarts only once at the end of a play, even if 5 tasks changed its config." },
+            { term: "Inventory", definition: "The map of your digital landscape, defining server roles and environment variables." },
+            { term: "Tags", definition: "Power-user tools for filtering. Tag tasks as 'security' and run only those to save time." },
+            { term: "Ansible Galaxy", definition: "The 'App Store' for DevOps. Hosts thousands of reusable roles written by companies and the community." },
+            { term: "Forks", definition: "A configuration setting determining how many servers Ansible communicates with simultaneously (default is 5)." },
+            { term: "Privilege Escalation", definition: "The 'become' system. Manages the transition from a low-privileged SSH user to a high-privileged administrative user (root) seamlessly." }
+        ];
+
+        const recallData = [
+            { q: "Why is the 'Gathering Facts' stage necessary at the start of a playbook?", a: "It runs the setup module to automatically discover system variables (OS version, IP addresses, RAM). This data allows playbooks to be dynamic, making decisions (using Conditionals) based on the actual state of the target machine." },
+            { q: "What happens if you run a playbook that uses the 'become' keyword, but the SSH user doesn't have sudo permissions?", a: "The task will fail with a permission denied or privilege escalation error. 'Become' relies on the underlying OS tools (like sudo or su) being properly configured for the connecting user." },
+            { q: "How does a 'Template' differ from a simple 'Copy' operation?", a: "Copy pushes static files exactly as they are. Templates process files through the Jinja2 engine, allowing variables, loops, and conditionals to be evaluated and injected into the file before it lands on the target node." },
+            { q: "Explain a scenario where an Ad-hoc command would be safer or better than a Playbook.", a: "During an active incident (like a zero-day vulnerability discovery), an ad-hoc command allows you to instantly query hundreds of servers for a specific package version or apply an emergency restart, faster than committing and running a full playbook pipeline." },
+            { q: "If a playbook run results in changed=0, what does that tell you about your infrastructure's alignment with your code?", a: "It indicates perfect alignment. Due to idempotency, changed=0 means the current state of the infrastructure exactly matches the desired state defined in your playbook, requiring zero modifications." }
+        ];
+
+        // UI State Management
+        let currentTab = 'core';
+        let topicsChartInstance = null;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('nav-active'));
+            
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+            document.getElementById('nav-' + tabId).classList.add('nav-active');
+            
+            if(tabId === 'pillars' && topicsChartInstance) {
+                topicsChartInstance.update();
+            }
+        }
+
+        // Initialize Charts
+        function initCharts() {
+            Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+            Chart.defaults.color = '#57534e'; // stone-500
+
+            // 1. Radar Chart (Core Philosophy)
+            const ctxArch = document.getElementById('architectureChart').getContext('2d');
+            new Chart(ctxArch, {
+                type: 'radar',
+                data: {
+                    labels: ['Idempotency', 'Speed to Setup', 'Scalability', 'Readability', 'Security (Agentless)'],
+                    datasets: [{
+                        label: 'Ansible',
+                        data: [95, 90, 85, 95, 100],
+                        backgroundColor: 'rgba(15, 118, 110, 0.2)', // teal-700
+                        borderColor: 'rgba(15, 118, 110, 1)',
+                        pointBackgroundColor: 'rgba(15, 118, 110, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: 'Traditional Bash Scripts',
+                        data: [20, 80, 40, 30, 60],
+                        backgroundColor: 'rgba(168, 162, 158, 0.2)', // stone-400
+                        borderColor: 'rgba(168, 162, 158, 1)',
+                        pointBackgroundColor: 'rgba(168, 162, 158, 1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e7e5e4' },
+                            grid: { color: '#e7e5e4' },
+                            pointLabels: { font: { size: 12, weight: 'bold' } },
+                            ticks: { display: false, max: 100, min: 0 }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // 2. Donut Chart (Topics Explorer)
+            const ctxTopics = document.getElementById('topicsChart').getContext('2d');
+            const topicLabels = topicsData.map(t => t.title);
+            // Array of complementary colors
+            const bgColors = [
+                '#0f766e', '#0d9488', '#14b8a6', '#4f46e5', '#6366f1', 
+                '#818cf8', '#b45309', '#d97706', '#f59e0b', '#292524'
+            ];
+
+            topicsChartInstance = new Chart(ctxTopics, {
+                type: 'doughnut',
+                data: {
+                    labels: topicLabels,
+                    datasets: [{
+                        data: Array(10).fill(10),
+                        backgroundColor: bgColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return " " + context.label; }
+                            }
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            renderTopicContent(index, bgColors[index]);
+                        }
+                    },
+                    onHover: (event, elements) => {
+                        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                    }
+                }
+            });
+        }
+
+        function renderTopicContent(index, colorHex) {
+            const topic = topicsData[index];
+            const contentDiv = document.getElementById('topic-content');
+            const accentDiv = document.getElementById('topic-accent');
+            
+            accentDiv.style.backgroundColor = colorHex;
+            
+            let pointsHtml = topic.points.map(p => `<li class="mb-3 pl-4 relative before:content-[''] before:absolute before:left-0 before:top-2 before:w-1.5 before:h-1.5 before:bg-stone-400 before:rounded-full">${p}</li>`).join('');
+
+            contentDiv.innerHTML = `
+                <div class="animate-[fadeIn_0.3s_ease-out]">
+                    <div class="flex items-center gap-4 mb-6">
+                        <span class="text-5xl">${topic.icon}</span>
+                        <h3 class="text-3xl font-bold tracking-tight">${topic.title}</h3>
+                    </div>
+                    <ul class="text-stone-300 text-lg leading-relaxed space-y-2">
+                        ${pointsHtml}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Initialize Glossary
+        function initGlossary() {
+            const grid = document.getElementById('vocab-grid');
+            const search = document.getElementById('vocabSearch');
+
+            function renderCards(filter = '') {
+                grid.innerHTML = '';
+                const filtered = vocabData.filter(v => 
+                    v.term.toLowerCase().includes(filter.toLowerCase()) || 
+                    v.definition.toLowerCase().includes(filter.toLowerCase())
+                );
+
+                if(filtered.length === 0) {
+                    grid.innerHTML = `<p class="col-span-full text-center text-stone-500 py-10">No terminology found matching "${filter}".</p>`;
+                    return;
+                }
+
+                filtered.forEach(v => {
+                    const card = document.createElement('div');
+                    card.className = 'flashcard relative h-48 w-full cursor-pointer perspective-1000';
+                    card.onclick = () => card.classList.toggle('flipped');
+                    
+                    card.innerHTML = `
+                        <div class="flashcard-inner absolute w-full h-full duration-500 shadow-md rounded-xl text-center">
+                            <div class="flashcard-front absolute w-full h-full bg-white border border-stone-200 rounded-xl flex items-center justify-center p-6 text-stone-800 font-bold text-xl hover:shadow-lg transition-shadow">
+                                ${v.term}
+                            </div>
+                            <div class="flashcard-back absolute w-full h-full bg-stone-800 text-stone-100 rounded-xl flex items-center justify-center p-6 text-sm md:text-base overflow-y-auto">
+                                ${v.definition}
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            renderCards();
+            search.addEventListener('input', (e) => renderCards(e.target.value));
+        }
+
+        // Initialize Active Recall Quiz
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            
+            recallData.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden';
+                
+                row.innerHTML = `
+                    <button class="w-full text-left p-6 focus:outline-none focus:bg-stone-50 transition-colors flex justify-between items-center group" onclick="toggleAnswer('answer-${index}', 'icon-${index}')">
+                        <span class="font-bold text-stone-800 text-lg pr-8"><span class="text-amber-500 mr-2">Q:</span>${item.q}</span>
+                        <span id="icon-${index}" class="text-stone-400 group-hover:text-stone-600 transition-transform duration-300 text-2xl">&#43;</span>
+                    </button>
+                    <div id="answer-${index}" class="hidden bg-stone-50 border-t border-stone-200 p-6 text-stone-700 leading-relaxed">
+                        <span class="font-bold text-teal-700 mr-2">A:</span>${item.a}
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function toggleAnswer(answerId, iconId) {
+            const answerEl = document.getElementById(answerId);
+            const iconEl = document.getElementById(iconId);
+            
+            if (answerEl.classList.contains('hidden')) {
+                answerEl.classList.remove('hidden');
+                iconEl.innerHTML = '&#8722;'; // Minus symbol
+                iconEl.style.transform = 'rotate(180deg)';
+            } else {
+                answerEl.classList.add('hidden');
+                iconEl.innerHTML = '&#43;'; // Plus symbol
+                iconEl.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Boot
+        window.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            initGlossary();
+            initQuiz();
+        });
+
+    </script>
+</body>
+</html>
